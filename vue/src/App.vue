@@ -1,17 +1,47 @@
 <script setup lang="ts">
-  import { computed, ref } from 'vue';
+  import { computed, nextTick, ref, watchEffect } from 'vue';
 import { itemMap } from './data/items';
 import Item from './components/Item.vue';
 import SearchBox from './components/SearchBox.vue';
-
-  const input = ref('');
+import { queueTask } from './queueTask';
 
   const itemIds = computed(() => Array.from(itemMap.keys()))
+
+  const input = ref('');
+  const searchQuery = ref({
+    prev: "",
+    current: "",
+    threshold: 0,
+  });
+
+  watchEffect((onCleanup) => {
+    searchQuery.value.current = input.value;
+    searchQuery.value.threshold = 0;
+
+    let threshold = 0;
+    let canceled = false;
+    onCleanup(() => (canceled = true));
+    nextTick().then(step);
+
+    function step() {
+      if (canceled) {
+        return;
+      }
+      searchQuery.value.threshold = threshold += 100;
+      if (threshold < itemIds.value.length) {
+        queueTask(step);
+      } else {
+        searchQuery.value.prev = input.value;
+      }
+    }
+  });
 </script>
 
 <template>
   <div class="pokemonList">
-    <Item v-for="id in itemIds" :key="id" :id="id" :search-query="input" />
+    <Item v-for="(id, index) in itemIds" :key="id" :id="id" :search-query="index < searchQuery.threshold
+        ? searchQuery.current
+        : searchQuery.prev" />
   </div>
   <footer>
     <p>

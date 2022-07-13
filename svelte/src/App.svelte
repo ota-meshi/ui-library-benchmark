@@ -34,11 +34,13 @@
             return;
           }
           threshold += 100;
-          set({ prev, current: input, threshold });
           if (threshold < itemIds.length) {
+            set({ prev, current: input, threshold });
             queueTask(() => {
               tick().then(step);
             });
+          } else {
+            set({ prev: input, current: input, threshold });
           }
         }
       }

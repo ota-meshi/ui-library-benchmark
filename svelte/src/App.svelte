@@ -27,7 +27,7 @@
       (set) => {
         let canceled = false;
         step();
-        return () => (canceled = false);
+        return () => (canceled = true);
 
         function step() {
           if (canceled) {

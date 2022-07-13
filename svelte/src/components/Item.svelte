@@ -11,9 +11,14 @@
   export let searchQuery: string;
 
   $: item = itemMap.get(id);
-  $: nameMarked = (() => {
+  $: ({ unmatched, prefix, mark, suffix } = (() => {
     if (!item) {
-      return undefined;
+      return {
+        unmatched: false,
+        prefix: "",
+        mark: "",
+        suffix: "",
+      };
     }
     if (!searchQuery) {
       return {
@@ -45,16 +50,15 @@
       mark,
       suffix,
     };
-  })();
+  })());
 </script>
 
-{#if item && nameMarked}
+{#if item}
   <div class="wrapper">
     <div class="id">{id}</div>
     <div>
-      <span class="name" class:unmatchedName={nameMarked.unmatched}>
-        {nameMarked.prefix}{#if nameMarked.mark}<mark>{nameMarked.mark}</mark
-          >{/if}{nameMarked.suffix}
+      <span class="name" class:unmatchedName={unmatched}>
+        {prefix}{#if mark}<mark>{mark}</mark>{/if}{suffix}
       </span>
     </div>
     <div>{item.ja}</div>
